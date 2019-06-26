@@ -32,7 +32,7 @@ static const u1_t PROGMEM DEVEUI[8]={ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 void os_getDevEui (u1_t* buf) { memcpy_P(buf, DEVEUI, 8);}
 
 // Anyway its in MSB mode.
-static const u1_t PROGMEM APPKEY[16] = { 0xA6, 0x6B, 0xB1, 0x34, 0xEC, 0xB5, 0x2F, 0xA1, 0x53, 0x7A, 0xBC, 0x70, 0xB5, 0x9F, 0xCF, 0x7F };
+static const u1_t PROGMEM APPKEY[16] = { 0x6F, 0xBA, 0x36, 0x61, 0x6E, 0xA8, 0x0F, 0xBF, 0xB3, 0x55, 0x33, 0x86, 0x8C, 0x25, 0x31, 0x87 };
 void os_getDevKey (u1_t* buf) {  memcpy_P(buf, APPKEY, 16);}
 
 static uint8_t mydata[] = "Hello, world!";
@@ -221,7 +221,7 @@ void setup_display(void)
   u8g2.enableUTF8Print();
   u8g2log.print("Display loaded...");
   u8g2log.print("\n");
-  u8g2log.print("TTN - MQTT");
+  u8g2log.print("TTN - OTAA ");
   u8g2log.print("\n");
 }
 
@@ -268,8 +268,8 @@ void setup() {
     LMIC.dn2Dr = DR_SF9;
 
     // Set data rate and transmit power for uplink (note: txpow seems to be ignored by the library)
-    //LMIC_setDrTxpow(DR_SF11,14);
-    LMIC_setDrTxpow(DR_SF9,14);
+    LMIC_setDrTxpow(DR_SF11,14);
+    //LMIC_setDrTxpow(DR_SF9,14);
 
     // Start job (sending automatically starts OTAA too)
     do_send(&sendjob);     // Will fire up also the join
