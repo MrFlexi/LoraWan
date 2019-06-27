@@ -51,11 +51,13 @@ Ticker aliveTicker;
 int runmode = 0;
 int aliveCounter = 0;
 String stringOne = "";
+String str = "";
+
 const float alivePeriod = 30; //seconds
 
 // assume 4x6 font, define width and height
 #define U8LOG_WIDTH 32
-#define U8LOG_HEIGHT 10
+#define U8LOG_HEIGHT 7
 
 
 //
@@ -109,7 +111,7 @@ void os_getArtEui (u1_t* buf) { }
 void os_getDevEui (u1_t* buf) { }
 void os_getDevKey (u1_t* buf) { }
 
-static uint8_t mydata[] = "Es ist warm!";
+uint8_t mydata[] = "Es ist warm!";
 static osjob_t sendjob;
 
 // Schedule TX every this many seconds (might become longer due to duty
@@ -193,9 +195,12 @@ void onEvent (ev_t ev) {
             Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
             if (LMIC.txrxFlags & TXRX_ACK)
               Serial.println(F("Received ack"));
+              log_display("Received ack");
             if (LMIC.dataLen) {
               Serial.println(F("Received "));
               Serial.println(LMIC.dataLen);
+              str = String(LMIC.dataLen);
+              log_display(str);
               Serial.println(F(" bytes of payload"));
             }
             // Schedule next transmission
@@ -256,7 +261,8 @@ void do_send(osjob_t* j){
     if (LMIC.opmode & OP_TXRXPEND) {
         Serial.println(F("OP_TXRXPEND, not sending"));
     } else {
-        // Prepare upstream data transmission at the next possible time.
+
+     // Prepare upstream data transmission at the next possible time.
         LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
         Serial.println(F("Packet queued"));
     }
