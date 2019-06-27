@@ -35,6 +35,11 @@
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
+#include <U8g2lib.h>
+#include <Ticker.h>
+
+
+Ticker aliveTicker;
 
 // LoRa Pins
 #define LoRa_RST  14  // GPIO 14
@@ -42,6 +47,15 @@
 #define LoRa_DIO0 26  // GPIO 26
 #define LoRa_DIO1 33  // GPIO 33
 #define LoRa_DIO2 32  // GPIO 32
+
+int runmode = 0;
+int aliveCounter = 0;
+String stringOne = "";
+const float alivePeriod = 30; //seconds
+
+// assume 4x6 font, define width and height
+#define U8LOG_WIDTH 32
+#define U8LOG_HEIGHT 10
 
 
 //
@@ -59,11 +73,21 @@
 #endif
 
 
-//Device EUI Isb
-//Application EUI Isb
-//#Device Address msb
-//#Network Session Key msb
-//#App Session Key msb
+//Display
+//Pin 4 = SDA (ist nicht der Standard-I2C-Port vom ESP32)
+//Pin 15 = SCL (ist nicht der Standard-I2C-Port vom ESP32)
+//Pin 16 = RST (muss bei Start kurz auf Low, dann auf High gesetzt werden)
+
+
+U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 15, /* data=*/ 4, /* reset=*/ 16);
+//U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE, /* clock=*/ SCL, /* data=*/ SDA);   // ESP32 Thing, HW I2C with pin remapping
+
+// allocate memory
+uint8_t u8log_buffer[U8LOG_WIDTH * U8LOG_HEIGHT];
+// Create a U8g2log object
+U8G2LOG u8g2log;
+
+
 
 
 // LoRaWAN NwkSKey, network session key msb
@@ -103,27 +127,50 @@ const lmic_pinmap lmic_pins = {
 };
 
 
+
+void log_display(String s)
+{
+  Serial.println(s);
+  if (runmode < 1)
+  {
+    u8g2log.print(s);
+    u8g2log.print("\n");
+  }
+}
+
+
+void alive() {
+  aliveCounter++;
+  stringOne = "Alive: ";
+  stringOne = stringOne + aliveCounter;   
+  log_display(stringOne);  
+}
+
+
 void onEvent (ev_t ev) {
     Serial.print(os_getTime());
     Serial.print(": ");
     switch(ev) {
-        case EV_SCAN_TIMEOUT:
+      case EV_SCAN_TIMEOUT:
             Serial.println(F("EV_SCAN_TIMEOUT"));
+            log_display("Timeout");
             break;
         case EV_BEACON_FOUND:
             Serial.println(F("EV_BEACON_FOUND"));
+            log_display("Beacon found");
             break;
         case EV_BEACON_MISSED:
-            Serial.println(F("EV_BEACON_MISSED"));
+            log_display("EV_BEACON_MISSED");
             break;
         case EV_BEACON_TRACKED:
-            Serial.println(F("EV_BEACON_TRACKED"));
+            log_display("EV_BEACON_TRACKED");
             break;
         case EV_JOINING:
             Serial.println(F("EV_JOINING"));
+            log_display("Joining...");
             break;
         case EV_JOINED:
-            Serial.println(F("EV_JOINED"));
+            log_display("EV_JOINED");
             break;
         /*
         || This event is defined but not used in the code. No
@@ -134,12 +181,15 @@ void onEvent (ev_t ev) {
         ||     break;
         */
         case EV_JOIN_FAILED:
+            log_display("EV_JOIN_FAILED");
             Serial.println(F("EV_JOIN_FAILED"));
             break;
         case EV_REJOIN_FAILED:
+            log_display("EV_REJOIN_FAILED");
             Serial.println(F("EV_REJOIN_FAILED"));
             break;
         case EV_TXCOMPLETE:
+            log_display("EV_TX_Completed");
             Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
             if (LMIC.txrxFlags & TXRX_ACK)
               Serial.println(F("Received ack"));
@@ -152,14 +202,15 @@ void onEvent (ev_t ev) {
             os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL), do_send);
             break;
         case EV_LOST_TSYNC:
+            log_display("EV_LOST Sync");
             Serial.println(F("EV_LOST_TSYNC"));
             break;
         case EV_RESET:
             Serial.println(F("EV_RESET"));
             break;
         case EV_RXCOMPLETE:
-            // data received in ping slot
-            Serial.println(F("EV_RXCOMPLETE"));
+            // data received in ping slot         
+            log_display("EV_RXCOMPLETE");
             break;
         case EV_LINK_DEAD:
             Serial.println(F("EV_LINK_DEAD"));
@@ -176,14 +227,29 @@ void onEvent (ev_t ev) {
         ||    break;
         */
         case EV_TXSTART:
-            Serial.println(F("EV_TXSTART"));
+            log_display("EV_TXSTART");
             break;
         default:
-            Serial.print(F("Unknown event: "));
+          log_display("Unknown event: ");
             Serial.println((unsigned) ev);
             break;
     }
 }
+
+void setup_display(void)
+{
+  u8g2.begin();
+  u8g2.setFont(u8g2_font_profont11_mf);                         // set the font for the terminal window
+  u8g2log.begin(u8g2, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer); // connect to u8g2, assign buffer
+  u8g2log.setLineHeightOffset(0);                               // set extra space between lines in pixel, this can be negative
+  u8g2log.setRedrawMode(0);                                     // 0: Update screen with newline, 1: Update screen for every char
+  u8g2.enableUTF8Print();
+  u8g2log.print("TheThingsNetwork...");
+  u8g2log.print("\n");
+  u8g2log.print("LoraWan-ABN ");
+  u8g2log.print("\n");
+}
+
 
 void do_send(osjob_t* j){
     // Check if there is not a current TX/RX job running
@@ -203,6 +269,10 @@ void setup() {
     Serial.begin(115200);
     delay(100);     // per sample code on RF_95 test
     Serial.println(F("Starting"));
+
+    setup_display();
+    aliveTicker.attach(alivePeriod, alive);    
+
 
     #ifdef VCC_ENABLE
     // For Pinoccio Scout boards
