@@ -221,7 +221,7 @@ void setup_display(void)
   u8g2.enableUTF8Print();
   u8g2log.print("Display loaded...");
   u8g2log.print("\n");
-  u8g2log.print("TTN - MQTT");
+  u8g2log.print("OTA - MQTT");
   u8g2log.print("\n");
 }
 
