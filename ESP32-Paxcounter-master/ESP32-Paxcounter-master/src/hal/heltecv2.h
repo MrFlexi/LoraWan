@@ -31,6 +31,11 @@
 #define MY_OLED_SCL SCL_OLED
 #define MY_OLED_RST RST_OLED
 
+// GPS settings
+#define HAS_GPS 1 // use on board GPS
+#define GPS_SERIAL 9600, SERIAL_8N1, GPIO_NUM_12, GPIO_NUM_15 // UBlox NEO 6M
+#define GPS_INT GPIO_NUM_13 // 30ns accurary timepulse, to be external wired on pcb: NEO 6M Pin#3 -> GPIO13
+
 // Pins for LORA chip SPI interface come from board file, we need some
 // additional definitions for LMIC
 #define LORA_IRQ DIO0
