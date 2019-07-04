@@ -19,20 +19,20 @@ int aliveCounter = 0;
 String stringOne = "";
 
 // assume 4x6 font, define width and height
-#define U8LOG_WIDTH 32
-#define U8LOG_HEIGHT 10
+#define U8LOG_WIDTH 32      // char
+#define U8LOG_HEIGHT 7      // lines
 
 
 // Copy the value from Application EUI from the TTN console in LSB mode
-static const u1_t PROGMEM APPEUI[8]={ 0x4B, 0xCC, 0x01, 0xD0, 0x7E, 0xD5, 0xB3, 0x70  };
+static const u1_t PROGMEM APPEUI[8]= { 0x4B, 0xCC, 0x01, 0xD0, 0x7E, 0xD5, 0xB3, 0x70  };
 void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
 
 // Copy the value from Device EUI from the TTN console in LSB mode.
-static const u1_t PROGMEM DEVEUI[8]={ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xDE  };
+static const u1_t PROGMEM DEVEUI[8]={ 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xDE };
 void os_getDevEui (u1_t* buf) { memcpy_P(buf, DEVEUI, 8);}
 
 // Anyway its in MSB mode.
-static const u1_t PROGMEM APPKEY[16] = { 0x6F, 0xBA, 0x36, 0x61, 0x6E, 0xA8, 0x0F, 0xBF, 0xB3, 0x55, 0x33, 0x86, 0x8C, 0x25, 0x31, 0x87 };
+static const u1_t PROGMEM APPKEY[16] = { 0x62, 0xFB, 0xD8, 0xB1, 0xE1, 0x96, 0xC4, 0x35, 0xBD, 0x6B, 0xE8, 0x4B, 0x15, 0xED, 0x80, 0xA0 };
 void os_getDevKey (u1_t* buf) {  memcpy_P(buf, APPKEY, 16);}
 
 static uint8_t mydata[] = "Hello, world!";
@@ -44,8 +44,6 @@ const unsigned TX_INTERVAL = 60;
 const float alivePeriod = 30; //seconds
 
 
-
-
 // Pin mapping
 const lmic_pinmap lmic_pins = {
     .nss = LoRa_CS,
@@ -55,14 +53,7 @@ const lmic_pinmap lmic_pins = {
 };
 
 
-//Display
-//Pin 4 = SDA (ist nicht der Standard-I2C-Port vom ESP32)
-//Pin 15 = SCL (ist nicht der Standard-I2C-Port vom ESP32)
-//Pin 16 = RST (muss bei Start kurz auf Low, dann auf High gesetzt werden)
-
-
 U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 15, /* data=*/ 4, /* reset=*/ 16);
-//U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE, /* clock=*/ SCL, /* data=*/ SDA);   // ESP32 Thing, HW I2C with pin remapping
 
 // allocate memory
 uint8_t u8log_buffer[U8LOG_WIDTH * U8LOG_HEIGHT];
@@ -94,7 +85,7 @@ void onEvent (ev_t ev) {
     switch(ev) {
         case EV_SCAN_TIMEOUT:
             Serial.println(F("EV_SCAN_TIMEOUT"));
-            log_display("Timeout");
+            log_display("EV Timeout");
             break;
         case EV_BEACON_FOUND:
             Serial.println(F("EV_BEACON_FOUND"));
@@ -193,7 +184,7 @@ void onEvent (ev_t ev) {
             log_display("EV_TXSTART");
             break;
         default:
-            log_display("Unknown event: ");
+            log_display("Unknown event: ");                  
             Serial.println((unsigned) ev);
             break;
     }
@@ -219,13 +210,10 @@ void setup_display(void)
   u8g2log.setLineHeightOffset(0);                               // set extra space between lines in pixel, this can be negative
   u8g2log.setRedrawMode(0);                                     // 0: Update screen with newline, 1: Update screen for every char
   u8g2.enableUTF8Print();
-  u8g2log.print("Display loaded...");
-  u8g2log.print("\n");
-<<<<<<< HEAD
-  u8g2log.print("OTA - MQTT");
-=======
+  u8g2log.print("--- LORAWAN ---");
+  u8g2log.print("\n");  
   u8g2log.print("TTN - OTAA ");
->>>>>>> 5fc74112df8391e8a60a897515dbc6e8ee0b8c17
+
   u8g2log.print("\n");
 }
 
@@ -272,8 +260,8 @@ void setup() {
     LMIC.dn2Dr = DR_SF9;
 
     // Set data rate and transmit power for uplink (note: txpow seems to be ignored by the library)
-    LMIC_setDrTxpow(DR_SF11,14);
-    //LMIC_setDrTxpow(DR_SF9,14);
+    //LMIC_setDrTxpow(DR_SF11,14);
+    LMIC_setDrTxpow(DR_SF9,14);
 
     // Start job (sending automatically starts OTAA too)
     do_send(&sendjob);     // Will fire up also the join
