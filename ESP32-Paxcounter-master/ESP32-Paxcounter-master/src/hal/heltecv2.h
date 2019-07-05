@@ -31,14 +31,11 @@
 #define MY_OLED_SCL SCL_OLED
 #define MY_OLED_RST RST_OLED
 
-<<<<<<< HEAD
-=======
 // GPS settings
 #define HAS_GPS 1 // use on board GPS
 #define GPS_SERIAL 4800, SERIAL_8N1, GPIO_NUM_12, GPIO_NUM_1 // GPIO12 = RX
 //#define GPS_INT GPIO_NUM_13 // 30ns accurary timepulse, to be external wired on pcb: NEO 6M Pin#3 -> GPIO13
 
->>>>>>> d6f12a91d5d9b51d5010615b089bc9e0f53e4299
 // Pins for LORA chip SPI interface come from board file, we need some
 // additional definitions for LMIC
 #define LORA_IRQ DIO0

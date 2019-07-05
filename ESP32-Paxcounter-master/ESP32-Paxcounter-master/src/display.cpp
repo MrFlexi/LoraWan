@@ -115,7 +115,7 @@ void init_display(const char *Productname, const char *Version) {
 #endif // HAS_LORA
     u8x8.clear();
     u8x8.setPowerSave(!cfg.screenon); // set display off if disabled
-    u8x8.draw2x2String(0, 0, "PAX:0");
+    u8x8.draw2x2String(0, 0, "Dev:0");
 #if (BLECOUNTER)
     u8x8.setCursor(0, 3);
     u8x8.printf("BLTH:0");
@@ -169,7 +169,7 @@ void draw_page(time_t t, uint8_t page) {
 
   // update counter (lines 0-1)
   snprintf(
-      buff, sizeof(buff), "PAX:%-4d",
+      buff, sizeof(buff), "Dev:%-4d",
       (int)macs.size()); // convert 16-bit MAC counter to decimal counter value
   u8x8.draw2x2String(0, 0,
                      buff); // display number on unique macs total Wifi + BLE
@@ -291,7 +291,7 @@ void draw_page(time_t t, uint8_t page) {
   case 2:
     // update counter (lines 0-1)
     snprintf(
-        buff, sizeof(buff), "PAX:%-4d",
+        buff, sizeof(buff), "Dev:%-4d",
         (int)
             macs.size()); // convert 16-bit MAC counter to decimal counter value
     u8x8.draw2x2String(0, 0,
