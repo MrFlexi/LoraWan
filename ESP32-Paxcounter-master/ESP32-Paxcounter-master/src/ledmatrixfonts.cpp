@@ -1,3 +1,4 @@
+#ifdef HAS_MATRIX_DISPLAY
 #include "ledmatrixfonts.h"
 #include "Arduino.h"
 //
@@ -930,3 +931,4 @@ const FONT_INFO digital7_18ptFontInfo = {
     digital7_18ptDescriptors, //  Character descriptor array
     digital7_18ptBitmaps,     //  Character bitmap array
 };
+#endif
