@@ -76,16 +76,6 @@ void set_wifichancycle(uint8_t val[]) {
            cfg.wifichancycle / float(100));
 }
 
-void set_blescantime(uint8_t val[]) {
-  //cfg.blescantime = val[0];
-  //ESP_LOGI(TAG, "Remote command: set BLE scan time to %.1f seconds",
-  //        cfg.blescantime / float(100));
-  // stop & restart BLE scan task to apply new parameter
-  //if (cfg.blescan) {
-  //  stop_BLEscan();
-  //  start_BLEscan();
-  //}
-}
 
 void set_countmode(uint8_t val[]) {
   switch (val[0]) {
@@ -189,16 +179,6 @@ void set_loraadr(uint8_t val[]) {
 #endif // HAS_LORA
 }
 
-void set_blescan(uint8_t val[]) {
-  ESP_LOGI(TAG, "Remote command: set BLE scanner to %s", val[0] ? "on" : "off");
-  //cfg.blescan = val[0] ? 1 : 0;
-  //if (cfg.blescan)
-  //  start_BLEscan();
-  //else {
-  //  macs_ble = 0; // clear BLE counter
-  //  stop_BLEscan();
-  //}
-}
 
 void set_wifiant(uint8_t val[]) {
   ESP_LOGI(TAG, "Remote command: set Wifi antenna to %s",
@@ -301,8 +281,10 @@ cmd_t table[] = {
     {0x05, set_lorasf, 1, true},        {0x06, set_lorapower, 1, true},
     {0x07, set_loraadr, 1, true},       {0x08, set_screensaver, 1, true},
     {0x09, set_reset, 1, true},         {0x0a, set_sendcycle, 1, true},
-    {0x0b, set_wifichancycle, 1, true}, {0x0c, set_blescantime, 1, true},
-    {0x0d, set_vendorfilter, 1, false}, {0x0e, set_blescan, 1, true},
+    {0x0b, set_wifichancycle, 1, true}, 
+    //{0x0c, set_blescantime, 1, true},
+    {0x0d, set_vendorfilter, 1, false}, 
+    //{0x0e, set_blescan, 1, true},
     {0x0f, set_wifiant, 1, true},       {0x10, set_rgblum, 1, true},
     {0x11, set_monitor, 1, true},       {0x12, set_beacon, 7, false},
     {0x13, set_sensor, 2, true},        {0x80, get_config, 0, false},
