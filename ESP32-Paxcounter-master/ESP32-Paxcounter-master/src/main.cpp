@@ -249,6 +249,23 @@ void setup() {
   }
 #endif
 
+// start BLE scan callback if BLE function is enabled in NVRAM configuration
+// or switch off bluetooth, if not compiled
+//#if (BLECOUNTER)
+//  strcat_P(features, " BLE");
+//  if (cfg.blescan) {
+//    ESP_LOGI(TAG, "Starting Bluetooth...");
+//    start_BLEscan();
+//  } else
+//    btStop();
+//#else
+  // remove bluetooth stack to gain more free memory
+//  btStop();
+//  ESP_ERROR_CHECK(esp_bt_mem_release(ESP_BT_MODE_BTDM));
+//  ESP_ERROR_CHECK(esp_coex_preference_set((
+//      esp_coex_prefer_t)ESP_COEX_PREFER_WIFI)); // configure Wifi/BT coexist lib
+//#endif
+
 // initialize gps
 #if (HAS_GPS)
   strcat_P(features, " GPS");
