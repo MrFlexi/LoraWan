@@ -1,3 +1,4 @@
+#ifdef HAS_MATRIX_DISPLAY
 #ifndef _MATRIX_DISPLAY_H
 #define _MATRIX_DISPLAY_H
 
@@ -14,4 +15,5 @@ void DrawNumber(String strNum, uint8_t iDotPos = 0);
 uint8_t GetCharFromFont(char cChar);
 uint8_t GetCharWidth(char cChar);
 
+#endif
 #endif

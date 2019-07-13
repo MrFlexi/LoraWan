@@ -39,11 +39,6 @@ void irqHandler(void *pvParameters) {
       refreshTheDisplay();
 #endif
 
-// LED Matrix display needs refresh?
-#ifdef HAS_MATRIX_DISPLAY
-    if (InterruptStatus & MATRIX_DISPLAY_IRQ)
-      refreshTheMatrixDisplay();
-#endif
 
 // gps refresh buffer?
 #if (HAS_GPS)

@@ -1,5 +1,6 @@
 // Fonts.h
 
+#ifdef HAS_MATRIX_DISPLAY
 #ifndef _FONTS_h
 #define _FONTS_h
 
@@ -40,4 +41,5 @@ extern const uint8_t digital7_18ptBitmaps[];
 extern const FONT_INFO digital7_18ptFontInfo;
 extern const FONT_CHAR_INFO digital7_18ptDescriptors[];
 
+#endif
 #endif
