@@ -14,7 +14,7 @@ Copyright  2018 Klaus Wilting <verkehrsrot@arcor.de>
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
+   See the License for the specific language governing permissions andt
    limitations under the License.
 
 NOTE:
@@ -347,7 +347,7 @@ void setup() {
   get_salt(); // get new 16bit for salting hashes
 #else
   // switch off wifi
-  WiFi.mode(WIFI_OFF);
+  //WiFi.mode(WIFI_OFF);
   esp_wifi_stop();
   esp_wifi_deinit();
 #endif
