@@ -1,11 +1,39 @@
+#define USE_WIFI        0
+#define USE_BME280      1
+#define USE_CAYENNE     1
+
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
 #include <U8g2lib.h>
 #include <Ticker.h>
 
+
+#include <Arduino.h>
+#include "WiFi.h"
+
+
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 // #define SLEEP_ESP32
+
+
+const char ssid[] = "MrFlexi";
+const char wifiPassword[] = "Linde-123";
+
+//-------------------------------------------------------------------------------
+//  Cayenne 
+//-------------------------------------------------------------------------------
+#define CAYENNE_PRINT Serial
+#include <CayenneMQTTESP32.h>
+
+// Cayenne authentication info. This should be obtained from the Cayenne Dashboard.
+char username[] = "ecddac20-a0eb-11e9-94e9-493d67fd755e";
+char password[] = "0010d05f8ccd918d0f8a45451950f8b80200e594";
+char clientID[] = "9ecd0770-b9ef-11e9-80af-177b80d8d7b2";
+
+// Use Virtual Channel 5 for uptime display.
+#define VIRTUAL_CHANNEL 5
+
 
 
 Ticker aliveTicker;
@@ -27,45 +55,6 @@ uint8_t u8log_buffer[U8LOG_WIDTH * U8LOG_HEIGHT];
 U8G2LOG u8g2log;
 
 
-void setup_display(void)
-{
-  u8g2.begin();
-  u8g2.setFont(u8g2_font_profont11_mf);                         // set the font for the terminal window
-  u8g2log.begin(u8g2, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer); // connect to u8g2, assign buffer
-  u8g2log.setLineHeightOffset(0);                               // set extra space between lines in pixel, this can be negative
-  u8g2log.setRedrawMode(0);                                     // 0: Update screen with newline, 1: Update screen for every char
-  u8g2.enableUTF8Print();
-  u8g2log.print("Display loaded...");
-  u8g2log.print("\n");
-  u8g2log.print("TTN  - ABP");
-  u8g2log.print("\n");
-}
-
-void log_display(String s)
-{
-  Serial.println(s);
-  if (runmode < 1)
-  {
-    u8g2log.print(s);
-    u8g2log.print("\n");
-  }
-}
-
-void alive() {
-  String stringOne;
-  aliveCounter++;
-  stringOne = "Alive: ";
-  stringOne = stringOne + aliveCounter;   
-  log_display(stringOne);  
-}
-
-
-
-
-// Application EUI Isb
-
-
-
 // LoRaWAN NwkSKey, network session key // msb
 static const PROGMEM u1_t NWKSKEY[16] = { 0x0A, 0x5C, 0x54, 0x63, 0x63, 0x6B, 0x57, 0x78, 0x96, 0xF3, 0x99, 0x92, 0x3E, 0xB8, 0xBB, 0x16 };
 
@@ -76,7 +65,6 @@ static const u1_t PROGMEM APPSKEY[16] = { 0x68, 0xD8, 0x63, 0x68, 0x86, 0xC5, 0x
 // See http://thethingsnetwork.org/wiki/AddressSpace
 // The library converts the address to network byte order as needed.
 static const u4_t DEVADDR = 0x26011B09 ; // <-- Change this address for every node!
-
 
 
 // These callbacks are only used in over-the-air activation, so they are
@@ -112,6 +100,65 @@ const lmic_pinmap lmic_pins = {
   .rst = LMIC_UNUSED_PIN,
   .dio = {/*dio0*/ 26, /*dio1*/ 33, /*dio2*/ 32}
 };
+
+
+void setup_display(void)
+{
+  u8g2.begin();
+  u8g2.setFont(u8g2_font_profont11_mf);                         // set the font for the terminal window
+  u8g2log.begin(u8g2, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer); // connect to u8g2, assign buffer
+  u8g2log.setLineHeightOffset(0);                               // set extra space between lines in pixel, this can be negative
+  u8g2log.setRedrawMode(0);                                     // 0: Update screen with newline, 1: Update screen for every char
+  u8g2.enableUTF8Print();
+  u8g2log.print("Display loaded...");
+  u8g2log.print("\n");
+  u8g2log.print("TTN  - ABP");
+  u8g2log.print("\n");
+}
+
+void log_display(String s)
+{
+  Serial.println(s);
+  if (runmode < 1)
+  {
+    u8g2log.print(s);
+    u8g2log.print("\n");
+  }
+}
+
+void alive() {
+  String stringOne;
+  aliveCounter++;
+  stringOne = "Alive: ";
+  stringOne = stringOne + aliveCounter;   
+  log_display(stringOne);
+  Cayenne.virtualWrite(1, 0, "digital_sensor", "d");  
+}
+
+
+void setup_wifi()
+{
+
+#if (USE_WIFI) 
+  // WIFI Setup
+  WiFi.begin(ssid, wifiPassword );
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(1000);
+      ESP_LOGI(TAG, "Connecting to WiFi..");    
+  }
+
+  ESP_LOGI(TAG, WiFi.localIP() );  
+  
+#endif
+}
+
+
+void setup_cayenne()
+{
+Cayenne.begin(username, password, clientID, ssid, wifiPassword);
+}
 
 
 void get_coords()
@@ -191,8 +238,7 @@ void onEvent (ev_t ev) {
       log_display("EV_TXCOMPLETE");
       Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
       if (LMIC.txrxFlags & TXRX_ACK)
-        log_display("Received ack");        
-        EV_TXCOMPLETE
+        log_display("Received ack");                
       if (LMIC.dataLen) {
         Serial.println(F("Received "));        
         log_display(String(LMIC.dataLen));
@@ -226,11 +272,37 @@ void onEvent (ev_t ev) {
 }
 
 
+CAYENNE_IN_DEFAULT()
+{
+	CAYENNE_LOG("Channel %u, value %s", request.channel, getValue.asString());	
+}
+
+// This function is called at intervals to send data to Cayenne.
+CAYENNE_OUT(VIRTUAL_CHANNEL)
+{
+	CAYENNE_LOG("Sending Data to Cayenne");
+	// This command writes the device's uptime in seconds to the Virtual Channel.
+	Cayenne.virtualWrite(VIRTUAL_CHANNEL, millis() / 1000,  "counter", "null" );
+  Cayenne.virtualWrite(2, 22.4,  "temp", "c" );
+  Cayenne.virtualWrite(3, "Wer ist da",  "", "" );
+}
+
 
 void setup() {
   Serial.begin(115200);
   Serial.println(F("Starting"));
+  
   setup_display();
+  
+  #if( USE_CAYENNE)
+  setup_cayenne();
+  #endif
+
+  #if (USE_WIFI)
+  setup_wifi( );
+  #endif
+
+
   aliveTicker.attach(alivePeriod, alive);  
 
 
@@ -320,4 +392,5 @@ void setup() {
 
 void loop() {
   os_runloop_once();  // Will never run if SLEEP_ESP is set
+  Cayenne.loop();
 }
