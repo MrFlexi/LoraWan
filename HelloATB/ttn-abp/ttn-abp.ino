@@ -73,12 +73,6 @@ void setup_display(void)
   u8g2log.print("\n");
 }
 
-void alive() {
-  aliveCounter++;
-  stringOne = "Alive: ";
-  stringOne = stringOne + aliveCounter;   
-  log_display(stringOne);  
-}
 
 void log_display(String s)
 {
@@ -89,6 +83,14 @@ void log_display(String s)
     u8g2log.print("\n");
   }
 }
+void alive() {
+  aliveCounter++;
+  stringOne = "Alive: ";
+  stringOne = stringOne + aliveCounter;   
+  log_display(stringOne);  
+}
+
+
 
 
 //

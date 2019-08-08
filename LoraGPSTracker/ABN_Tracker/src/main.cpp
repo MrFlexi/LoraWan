@@ -5,7 +5,7 @@
 #include <Ticker.h>
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-#define SLEEP_ESP32
+// #define SLEEP_ESP32
 
 
 Ticker aliveTicker;
@@ -62,10 +62,14 @@ void alive() {
 
 
 
-// LoRaWAN NwkSKey, network session key
+// Application EUI Isb
+
+
+
+// LoRaWAN NwkSKey, network session key // msb
 static const PROGMEM u1_t NWKSKEY[16] = { 0x0A, 0x5C, 0x54, 0x63, 0x63, 0x6B, 0x57, 0x78, 0x96, 0xF3, 0x99, 0x92, 0x3E, 0xB8, 0xBB, 0x16 };
 
-// LoRaWAN AppSKey, application session key
+// LoRaWAN AppSKey, application session key // msb
 static const u1_t PROGMEM APPSKEY[16] = { 0x68, 0xD8, 0x63, 0x68, 0x86, 0xC5, 0xB2, 0xAC, 0x27, 0xC9, 0xF7, 0x63, 0x80, 0xE4, 0xB7, 0x88 };
 
 // LoRaWAN end-device address (DevAddr)
@@ -77,7 +81,7 @@ static const u4_t DEVADDR = 0x26011B09 ; // <-- Change this address for every no
 
 // These callbacks are only used in over-the-air activation, so they are
 // left empty here (we cannot leave them out completely unless
-// DISABLE_JOIN is set in config.h, otherwise the linker will complain).
+// DISABLE_JOIN is set in config.h, otherwise the linker will complain). 
 void os_getArtEui (u1_t* buf) { }
 void os_getDevEui (u1_t* buf) { }
 void os_getDevKey (u1_t* buf) { }
@@ -137,6 +141,7 @@ void get_coords()
 
 void do_send(osjob_t* j) {
   // Check if there is not a current TX/RX job running
+  log_display("Start TX");
 
   if (LMIC.opmode & OP_TXRXPEND) {
     Serial.println(F("OP_TXRXPEND, not sending"));
@@ -145,6 +150,7 @@ void do_send(osjob_t* j) {
     get_coords();
     LMIC_setTxData2(1, (uint8_t*) txBuffer, sizeof(txBuffer), 0);
     Serial.println(F("Packet queued"));
+    log_display("Packet queued");
   }
   // Next TX is scheduled after TX_COMPLETE event.
 }
@@ -182,12 +188,14 @@ void onEvent (ev_t ev) {
       Serial.println(F("EV_REJOIN_FAILED"));
       break;
     case EV_TXCOMPLETE:
+      log_display("EV_TXCOMPLETE");
       Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
       if (LMIC.txrxFlags & TXRX_ACK)
-        Serial.println(F("Received ack"));
+        log_display("Received ack");        
+        EV_TXCOMPLETE
       if (LMIC.dataLen) {
-        Serial.println(F("Received "));
-        Serial.println(LMIC.dataLen);
+        Serial.println(F("Received "));        
+        log_display(String(LMIC.dataLen));
         Serial.println(F(" bytes of payload"));
       }
       // Schedule next transmission
@@ -203,6 +211,7 @@ void onEvent (ev_t ev) {
     case EV_RXCOMPLETE:
       // data received in ping slot
       Serial.println(F("EV_RXCOMPLETE"));
+      log_display("EV_RXCOMPLETE");
       break;
     case EV_LINK_DEAD:
       Serial.println(F("EV_LINK_DEAD"));
