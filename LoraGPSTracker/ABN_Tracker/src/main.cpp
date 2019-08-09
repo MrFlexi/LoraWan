@@ -192,6 +192,7 @@ void do_send(osjob_t* j) {
 
   if (LMIC.opmode & OP_TXRXPEND) {
     Serial.println(F("OP_TXRXPEND, not sending"));
+    log_display("TX RX pending...");
   } else {
     // Prepare upstream data transmission at the next possible time.
     get_coords();
@@ -220,16 +221,16 @@ void onEvent (ev_t ev) {
       Serial.println(F("EV_BEACON_TRACKED"));
       break;
     case EV_JOINING:
-      Serial.println(F("EV_JOINING"));
+      log_display("Joining...");
       break;
     case EV_JOINED:
-      Serial.println(F("EV_JOINED"));
+      log_display("joined");
       break;
     case EV_RFU1:
       Serial.println(F("EV_RFU1"));
       break;
     case EV_JOIN_FAILED:
-      Serial.println(F("EV_JOIN_FAILED"));
+      log_display("Join failed");
       break;
     case EV_REJOIN_FAILED:
       Serial.println(F("EV_REJOIN_FAILED"));
@@ -249,14 +250,13 @@ void onEvent (ev_t ev) {
       next = true;
       break;
     case EV_LOST_TSYNC:
-      Serial.println(F("EV_LOST_TSYNC"));
+      log_display("Lost sync");
       break;
     case EV_RESET:
       Serial.println(F("EV_RESET"));
       break;
     case EV_RXCOMPLETE:
       // data received in ping slot
-      Serial.println(F("EV_RXCOMPLETE"));
       log_display("EV_RXCOMPLETE");
       break;
     case EV_LINK_DEAD:
@@ -266,7 +266,7 @@ void onEvent (ev_t ev) {
       Serial.println(F("EV_LINK_ALIVE"));
       break;
     default:
-      Serial.println(F("Unknown event"));
+      log_display("Unknown event");
       break;
   }
 }

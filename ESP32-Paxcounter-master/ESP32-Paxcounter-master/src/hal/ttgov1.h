@@ -23,6 +23,11 @@
 #define LED_ACTIVE_LOW 1  // Onboard LED is active when pin is LOW
 #define HAS_BUTTON KEY_BUILTIN
 
+// BME280 sensor on I2C bus
+#define HAS_BME 1 // Enable BME sensors in general
+#define HAS_BME280 GPIO_NUM_21, GPIO_NUM_13 // SDA, SCL
+#define BME280_ADDR 0x76 // change to 0x77 depending on your wiring
+
 // Pins for I2C interface of OLED Display
 #define MY_OLED_SDA (4)
 #define MY_OLED_SCL (15)
