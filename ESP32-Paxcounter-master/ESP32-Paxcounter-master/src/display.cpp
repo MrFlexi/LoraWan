@@ -341,6 +341,10 @@ void draw_page(time_t t, uint8_t page) {
     snprintf(buff, sizeof(buff), "HUM:%-4.1f", bme_status.humidity);
     u8x8.draw2x2String(0, 4, buff);
 
+     // line 4-5: Hum
+    snprintf(buff, sizeof(buff), "HPA:%-4.1f", bme_status.humidity);
+    u8x8.draw2x2String(0, 6, buff);
+
 #ifdef HAS_BME680
     // line 6-7: IAQ
     snprintf(buff, sizeof(buff), "IAQ:%-4.1f", bme_status.iaq);
